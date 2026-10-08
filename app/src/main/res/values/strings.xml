@@ -9,6 +9,7 @@
 
     <!-- Device list -->
     <string name="devices_subtitle">Devices on your network</string>
+    <string name="shortcut_long_label">Open %1$s</string>
     <string name="device_paired">Paired</string>
     <string name="device_pair">Pair</string>
     <string name="scan_again">Scan again</string>

@@ -1,6 +1,7 @@
 package dev.atvremote.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -57,7 +58,12 @@ private val LightColors = lightColorScheme(
 
 class MainActivity : ComponentActivity() {
 
-    private val vm: RemoteViewModel by viewModels()
+    // A home-screen quick-action shortcut for a specific, already-paired
+    // Apple TV carries its credential key here, so the app can connect
+    // straight to that device instead of showing the device list.
+    private val vm: RemoteViewModel by viewModels {
+        RemoteViewModel.factory(application, intent?.getStringExtra(EXTRA_DEVICE_KEY))
+    }
 
     // Registered unconditionally: the contract has to be in place before the
     // activity resumes, whether or not this build will ever ask.
@@ -77,7 +83,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    AppRoot()
+                    // Passed explicitly: the default `viewModel()` below would
+                    // otherwise resolve its own instance via the activity's
+                    // default factory, which knows nothing about directKey.
+                    AppRoot(vm)
                 }
             }
         }
@@ -112,6 +121,22 @@ class MainActivity : ComponentActivity() {
         val granted = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    /**
+     * The activity is single-task, so tapping a shortcut while the app is
+     * already running delivers here instead of creating a second instance —
+     * route it to the already-live view model rather than relying on a fresh
+     * [onCreate].
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.getStringExtra(EXTRA_DEVICE_KEY)?.let { vm.connectToKnownKey(it) }
+    }
+
+    companion object {
+        const val EXTRA_DEVICE_KEY = "dev.atvremote.app.EXTRA_DEVICE_KEY"
     }
 }
 

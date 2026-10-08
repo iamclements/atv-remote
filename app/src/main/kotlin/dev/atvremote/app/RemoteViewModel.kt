@@ -6,6 +6,8 @@ import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.atvremote.protocol.companion.AppInfo
 import dev.atvremote.protocol.companion.AppleTvRemote
 import dev.atvremote.protocol.companion.Button
@@ -120,7 +122,15 @@ fun UiState.withNowPlaying(playing: NowPlaying?): UiState {
     )
 }
 
-class RemoteViewModel(app: Application) : AndroidViewModel(app) {
+class RemoteViewModel(
+    app: Application,
+    /**
+     * A credential key to connect to immediately, bypassing the device list —
+     * how a home-screen shortcut for a specific, already-paired Apple TV
+     * opens straight into its remote.
+     */
+    private val directKey: String? = null,
+) : AndroidViewModel(app) {
 
     private val discovery = NsdDiscovery(app)
     private val store = CredentialStore(app)
@@ -166,8 +176,20 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
         drainTouchInput()
-        autoConnectIfSingle()
+        AppShortcuts.sync(app, store)
+        if (directKey != null) {
+            autoConnectAttempted = true
+            connectToKnownKey(directKey)
+        } else {
+            autoConnectIfSingle()
+        }
         scan()
+    }
+
+    companion object {
+        fun factory(app: Application, directKey: String?) = viewModelFactory {
+            initializer { RemoteViewModel(app, directKey) }
+        }
     }
 
     // ----------------------------------------------------- media notification
@@ -284,6 +306,17 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
             _state.update { it.copy(autoConnecting = true) }
             connect(last)
         }
+    }
+
+    /**
+     * Jump straight into a specific, already-paired Apple TV — what a
+     * home-screen shortcut does. Falls back to the device list silently if
+     * the pairing has since been forgotten (the stored metadata is gone).
+     */
+    fun connectToKnownKey(key: String) {
+        val device = store.loadDevice(key) ?: return
+        _state.update { it.copy(autoConnecting = true) }
+        connect(device)
     }
 
     fun scan() {
@@ -526,6 +559,7 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
     private fun forgetPairing(device: AppleTvDevice) {
         store.forget(device.credentialKey)
         _state.update { it.copy(pairedKeys = it.pairedKeys - device.credentialKey) }
+        AppShortcuts.sync(getApplication(), store)
     }
 
     private fun str(id: Int, vararg args: Any?): String =
@@ -575,6 +609,8 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 currentDevice = device
                 store.saveLastDevice(device)
+                store.saveDevice(device)
+                AppShortcuts.sync(getApplication(), store)
                 // Now-playing must come up on every connect. Previously this
                 // only ran straight after AirPlay pairing, so it silently
                 // stopped working on the next app start.

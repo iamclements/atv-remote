@@ -66,6 +66,14 @@ class CredentialStore(context: Context) {
 
     fun forget(key: String) {
         prefs.edit().remove(key).apply()
+        prefs.edit()
+            .remove("meta-$key-name")
+            .remove("meta-$key-address")
+            .remove("meta-$key-port")
+            .remove("meta-$key-model")
+            .remove("meta-$key-identifier")
+            .remove("meta-$key-usedAt")
+            .apply()
     }
 
     fun isPaired(key: String): Boolean = prefs.contains(key)
@@ -77,6 +85,45 @@ class CredentialStore(context: Context) {
     fun pairedKeys(): Set<String> = prefs.all.keys
         .filter { !it.endsWith("-airplay") && !it.startsWith("last-") }
         .toSet()
+
+    /**
+     * Remembers every paired device's connection details (not just the most
+     * recent one), stamped with the time it was last connected to.
+     *
+     * This is what lets a home-screen shortcut jump straight to a specific
+     * Apple TV — including one that isn't the device the app happened to
+     * connect to last — without first waiting on mDNS discovery.
+     */
+    fun saveDevice(device: AppleTvDevice) {
+        val key = device.credentialKey
+        prefs.edit()
+            .putString("meta-$key-name", device.name)
+            .putString("meta-$key-address", device.address)
+            .putInt("meta-$key-port", device.port)
+            .putString("meta-$key-model", device.model)
+            .putString("meta-$key-identifier", device.identifier)
+            .putLong("meta-$key-usedAt", System.currentTimeMillis())
+            .apply()
+    }
+
+    fun loadDevice(key: String): AppleTvDevice? {
+        val name = prefs.getString("meta-$key-name", null) ?: return null
+        val address = prefs.getString("meta-$key-address", null) ?: return null
+        return AppleTvDevice(
+            name = name,
+            address = address,
+            port = prefs.getInt("meta-$key-port", 0),
+            model = prefs.getString("meta-$key-model", null),
+            identifier = prefs.getString("meta-$key-identifier", null),
+        )
+    }
+
+    /** Paired devices ordered by most recently connected to, for shortcuts. */
+    fun recentDevices(limit: Int): List<AppleTvDevice> = pairedKeys()
+        .mapNotNull { key -> prefs.getLong("meta-$key-usedAt", 0L).takeIf { it > 0 }?.let { key to it } }
+        .sortedByDescending { it.second }
+        .take(limit)
+        .mapNotNull { (key, _) -> loadDevice(key) }
 
     // Now-playing needs a second, independent AirPlay pairing with its own PIN.
     fun airplayKey(key: String): String = "$key-airplay"
