@@ -18,12 +18,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 private val DarkColors = darkColorScheme(
@@ -75,10 +78,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         askForNotifications()
         setContent {
-            // The remote follows the system just like the TV does: charcoal
-            // surfaces in the dark, a pale aluminium look in the light.
             val dark = isSystemInDarkTheme()
-            MaterialTheme(colorScheme = if (dark) DarkColors else LightColors) {
+            // Material You: on Android 12+, theme from the phone's wallpaper
+            // like the system apps do. Below that, fall back to the
+            // hand-picked palette — charcoal surfaces in the dark, a pale
+            // aluminium look in the light.
+            val context = LocalContext.current
+            val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else {
+                if (dark) DarkColors else LightColors
+            }
+            MaterialTheme(colorScheme = colorScheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

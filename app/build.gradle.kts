@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -66,10 +67,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -77,6 +74,12 @@ android {
 
     packaging {
         resources.excludes += setOf("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -89,6 +92,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
+    // Material 3 Expressive (MaterialExpressiveTheme, new shapes/motion) needs
+    // material3 1.5.0, which pulls in compileSdk 37 and AGP 9.1+ transitively
+    // — too far ahead of stable for an app whose job is working every day.
+    // As of late 2026 even the *stable* Compose track has moved onto that
+    // same compileSdk 37 requirement, so this stays pinned to the last BOM
+    // that targets compileSdk 35 — which already has dynamic (Material You)
+    // color; that API has been stable since Material 3 1.0.
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
