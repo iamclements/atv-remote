@@ -8,6 +8,9 @@
     <string name="disclaimer">Not affiliated with Apple Inc. Apple TV and AirPlay are trademarks of Apple Inc.</string>
 
     <!-- Device list -->
+    <!-- Short form of app_name for the on-screen heading, which wraps to two
+         lines at this font size if it carries the full descriptive title. -->
+    <string name="home_title">Puck</string>
     <string name="devices_subtitle">Devices on your network</string>
     <string name="shortcut_long_label">Open %1$s</string>
     <string name="device_paired">Paired</string>
