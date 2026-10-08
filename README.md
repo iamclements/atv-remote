@@ -1,7 +1,5 @@
 # Puck — Remote for Apple TVs
 
-[中文说明](README.zh-CN.md)
-
 An open-source **Android remote for Apple TV**, built to control more than one
 of them. It speaks Apple's Companion Link protocol natively in Kotlin, so there
 is no companion server, no Python bridge, and nothing to run on a Raspberry
@@ -76,7 +74,7 @@ Apache 2.0 — see [NOTICE](NOTICE).
 - Simplified now-playing card (±10 s skips; play/pause lives in the transport
   row), hold-to-repeat volume, haptic ticks, and the keyboard panel folds when
   OK is pressed on the TV
-- zh-CN localization and a light theme alongside the dark one
+- A light theme alongside the dark one
 - Fixed an intermittent startup crash in the touch-event pipeline
 
 </details>

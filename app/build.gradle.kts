@@ -26,6 +26,11 @@ android {
         // dev.atvremote.app, not an update to it.
         versionCode = 1
         versionName = "1.0"
+
+        // English-only: keeps any translated strings a dependency ships
+        // (e.g. a library's own "OK"/"Cancel") out of the APK too, not just
+        // our own resources.
+        resourceConfigurations += "en"
     }
 
     // Wire logging dumps frame hex, including pairing traffic. Off unless
