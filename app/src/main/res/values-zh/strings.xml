@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 设备列表 -->
-    <string name="app_name">Apple TV 遥控器</string>
+    <string name="app_name">Puck — Apple TV 遥控器</string>
     <string name="devices_subtitle">网络中的设备</string>
     <string name="shortcut_long_label">打开%1$s</string>
     <string name="device_paired">已配对</string>

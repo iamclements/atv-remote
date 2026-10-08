@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize

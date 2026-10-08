@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import android.content.Context
 import dev.atvremote.protocol.discovery.AppleTvDevice

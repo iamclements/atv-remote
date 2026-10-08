@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

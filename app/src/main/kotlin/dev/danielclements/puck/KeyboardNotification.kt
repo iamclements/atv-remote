@@ -1,6 +1,6 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
-import dev.atvremote.app.R
+import dev.danielclements.puck.R
 
 import android.app.Notification
 import android.app.NotificationChannel

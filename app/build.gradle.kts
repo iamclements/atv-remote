@@ -14,15 +14,17 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "dev.atvremote.app"
+    namespace = "dev.danielclements.puck"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.atvremote.app"
+        applicationId = "dev.danielclements.puck"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "2.1"
+        // Restarted at 1: this is a distinct app/listing from upstream's
+        // dev.atvremote.app, not an update to it.
+        versionCode = 1
+        versionName = "1.0"
     }
 
     // Wire logging dumps frame hex, including pairing traffic. Off unless

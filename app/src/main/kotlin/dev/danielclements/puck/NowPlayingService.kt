@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -264,8 +264,8 @@ class NowPlayingService : Service() {
         private const val SKIP = 10.0
         private const val VOLUME_STEPS = 20
 
-        private const val ACTION_PLAY_PAUSE = "dev.atvremote.app.PLAY_PAUSE"
-        private const val ACTION_REWIND = "dev.atvremote.app.REWIND"
-        private const val ACTION_FORWARD = "dev.atvremote.app.FORWARD"
+        private const val ACTION_PLAY_PAUSE = "dev.danielclements.puck.PLAY_PAUSE"
+        private const val ACTION_REWIND = "dev.danielclements.puck.REWIND"
+        private const val ACTION_FORWARD = "dev.danielclements.puck.FORWARD"
     }
 }

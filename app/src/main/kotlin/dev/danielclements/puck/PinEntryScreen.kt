@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
-import dev.atvremote.app.R
+import dev.danielclements.puck.R
 import dev.atvremote.protocol.discovery.AppleTvDevice
 
 @Composable

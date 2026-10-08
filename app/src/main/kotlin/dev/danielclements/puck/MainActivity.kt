@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 import android.Manifest
 import android.content.Intent
@@ -136,7 +136,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        const val EXTRA_DEVICE_KEY = "dev.atvremote.app.EXTRA_DEVICE_KEY"
+        const val EXTRA_DEVICE_KEY = "dev.danielclements.puck.EXTRA_DEVICE_KEY"
     }
 }
 

@@ -1,4 +1,4 @@
-package dev.atvremote.app
+package dev.danielclements.puck
 
 /**
  * Icons for Apple's built-in tvOS apps.

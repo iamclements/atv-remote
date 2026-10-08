@@ -1,10 +1,10 @@
-# Apple TV 遥控器 — Android
+# Puck — Apple TV 遥控器
 
 [English](README.md)
 
-一个开源的 **Apple TV 安卓遥控器**。原生使用 Kotlin 实现 Apple 的 Companion
-Link 协议 —— 不需要 companion 服务器、不需要 Python 桥接、也不需要树莓派，
-手机上装一个 APK 即可。
+一个开源的 **Apple TV 安卓遥控器**，支持同时管理多台 Apple TV。原生使用
+Kotlin 实现 Apple 的 Companion Link 协议 —— 不需要 companion 服务器、不需要
+Python 桥接、也不需要树莓派，手机上装一个 APK 即可。
 
 支持现代 Apple TV（老式 DMAP 遥控应用已无法工作的型号也能用）。
 
@@ -37,6 +37,11 @@ Link 协议 —— 不需要 companion 服务器、不需要 Python 桥接、也
 - 音量长按连调、按键触觉反馈、OK 键收起键盘面板
 - 新增中文界面与浅色主题
 - 修复偶发的启动闪退
+
+Fork 后新增：
+
+- **主屏幕快捷方式** —— 长按桌面图标，直接跳转到最近使用的两台 Apple TV，
+  跳过设备列表
 
 ## 安装
 

@@ -1,16 +1,30 @@
-# Remote for Apple TV — Android
+# Puck — Remote for Apple TVs
 
 [中文说明](README.zh-CN.md)
 
-An open-source **Apple TV remote for Android**. It speaks Apple's Companion
-Link protocol natively in Kotlin, so there is no companion server, no Python
-bridge, and nothing to run on a Raspberry Pi — just an APK on your phone.
+An open-source **Android remote for Apple TV**, built to control more than one
+of them. It speaks Apple's Companion Link protocol natively in Kotlin, so there
+is no companion server, no Python bridge, and nothing to run on a Raspberry
+Pi — just an APK on your phone.
 
 Works with modern Apple TVs, where older DMAP-based remote apps no longer do.
 
 > **Not affiliated with Apple Inc.** "Apple", "Apple TV", "AirPlay" and "Siri"
 > are trademarks of Apple Inc., registered in the U.S. and other countries.
 > They are used here solely to describe compatibility.
+
+## Credits
+
+Puck is a fork of [**Remote for Apple
+TV**](https://github.com/msthind04/AppleTV-Remote) by
+[msthind04](https://github.com/msthind04) — all of the protocol work
+(Companion Link, AirPlay/MRP, the SRP6a/HAP pairing handshake, OPACK and
+binary-plist codecs) and the original remote-control UI come from that
+project. This fork renames the app, adds persistent multi-device support with
+home-screen quick-action shortcuts for your most-used Apple TVs, and will
+carry its own visual design going forward. See `git log` for the exact history
+of what changed after the fork point. Licensed, like the original, under
+Apache 2.0 — see [NOTICE](NOTICE).
 
 ## Features
 
@@ -35,7 +49,19 @@ Works with modern Apple TVs, where older DMAP-based remote apps no longer do.
 - **Media notification** — the same controls in the notification shade and on
   the lock screen, so the phone need not be unlocked to use them
 
-## What's changed
+## What's changed since forking
+
+- **Home-screen quick-action shortcuts.** Long-press the launcher icon for
+  direct shortcuts to your two most recently used Apple TVs — tapping one
+  connects straight into that device's remote, skipping the device list.
+  Backed by a persistent per-device registry (not just the one most-recent
+  device upstream remembers), so a shortcut still works for a TV you haven't
+  opened in a while.
+- Renamed and re-identified as its own app (`dev.danielclements.puck`), not an
+  update to upstream's listing.
+
+<details>
+<summary>Inherited from Remote for Apple TV (upstream)</summary>
 
 - The D-pad and trackpad are merged into one Siri-Remote-style pad: directional
   buttons on the rim, a touch surface in the middle, and the whole surface is
@@ -52,6 +78,8 @@ Works with modern Apple TVs, where older DMAP-based remote apps no longer do.
   OK is pressed on the TV
 - zh-CN localization and a light theme alongside the dark one
 - Fixed an intermittent startup crash in the touch-event pipeline
+
+</details>
 
 ## Install
 
