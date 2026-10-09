@@ -1,5 +1,8 @@
 # Puck — Remote for Apple TVs
 
+[![CI](https://github.com/iamclements/puck/actions/workflows/ci.yml/badge.svg)](https://github.com/iamclements/puck/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 An open-source **Android remote for Apple TV**, built to control more than one
 of them. It speaks Apple's Companion Link protocol natively in Kotlin, so there
 is no companion server, no Python bridge, and nothing to run on a Raspberry
@@ -10,6 +13,13 @@ Works with modern Apple TVs, where older DMAP-based remote apps no longer do.
 > **Not affiliated with Apple Inc.** "Apple", "Apple TV", "AirPlay" and "Siri"
 > are trademarks of Apple Inc., registered in the U.S. and other countries.
 > They are used here solely to describe compatibility.
+
+<p align="center">
+  <img src="docs/screenshots/devices.png" width="23%" alt="Device list" />
+  <img src="docs/screenshots/remote.png" width="23%" alt="Remote screen, light theme" />
+  <img src="docs/screenshots/remote_dark.png" width="23%" alt="Remote screen, dark theme" />
+  <img src="docs/screenshots/apps.png" width="23%" alt="App drawer" />
+</p>
 
 ## Credits
 
@@ -26,12 +36,15 @@ Apache 2.0 — see [NOTICE](NOTICE).
 
 ## Features
 
-- **Discovery** — finds Apple TVs on your network automatically
-- **Siri-Remote-style pad** — directional buttons around the rim, a touch
-  surface in the middle. Swiping streams real touch samples with a
-  pointer-ballistics curve, so momentum scrolling behaves like the hardware
-  remote; tap selects, holding the surface sends a long press, which is how
-  tvOS opens contextual menus
+- **Discovery** — finds Apple TVs on your network automatically, and keeps
+  more than one paired at a time
+- **D-pad** — directional taps around the rim move one step at a time, the
+  same as pressing the rim of a real Siri Remote; holding a direction repeats
+  it; "OK" in the centre selects; a drag anywhere on the card pans and
+  momentum-scrolls with real touch samples, exactly like swiping the hardware
+  remote's clickpad. One surface, not an analogue joystick — see
+  [`RemoteScreen.kt`](app/src/main/kotlin/dev/danielclements/puck/RemoteScreen.kt)
+  for why that distinction mattered enough to redesign around twice
 - **Menu, Home, Play/Pause** — the play button reflects real playback state
 - **Power** — tap opens Control Centre, as the remote's own power button does;
   hold to wake a sleeping Apple TV
@@ -46,17 +59,33 @@ Apache 2.0 — see [NOTICE](NOTICE).
   scrubber you can drag to seek, 10-second skips and volume
 - **Media notification** — the same controls in the notification shade and on
   the lock screen, so the phone need not be unlocked to use them
+- **Home-screen widget** — a 1×1 tile pinned to one specific, already-paired
+  Apple TV; add one per TV, each configured independently, tap to jump
+  straight into that device's remote
+- **Quick Settings tiles** — two tiles tracking your most recently used Apple
+  TVs, addable from the Quick Settings editor
+- **Launcher shortcuts** — long-press the home-screen icon for direct
+  shortcuts to your two most recently used Apple TVs
+- **Material You** — themes from your wallpaper on Android 12+, with a
+  hand-picked charcoal/aluminium palette as the fallback below that
 
 ## What's changed since forking
 
-- **Home-screen quick-action shortcuts.** Long-press the launcher icon for
-  direct shortcuts to your two most recently used Apple TVs — tapping one
-  connects straight into that device's remote, skipping the device list.
-  Backed by a persistent per-device registry (not just the one most-recent
-  device upstream remembers), so a shortcut still works for a TV you haven't
-  opened in a while.
+- **Multi-device, properly.** A persistent per-device registry (not just the
+  one most-recent device upstream remembers) backs home-screen shortcuts, a
+  per-device pinnable widget, and Quick Settings tiles — pick a specific TV
+  from the home screen or Quick Settings without opening the app first.
+- **Redesigned control pad.** Bigger touch targets throughout (the old header
+  icons were below Android's own 48dp minimum), and a visual rework of the
+  pad itself: it used to read as a draggable analogue joystick, which was the
+  wrong mental model for a surface where a tap is one discrete step and a
+  hold just repeats it. Arrows plus a plain "OK" label now say what it does
+  without implying something continuous.
+- **Material You dynamic color** on Android 12+.
 - Renamed and re-identified as its own app (`dev.danielclements.puck`), not an
-  update to upstream's listing.
+  update to upstream's listing. English-only.
+- BouncyCastle and the Android/Kotlin toolchain kept current as part of a
+  pre-install security review (see commit history for what was checked).
 
 <details>
 <summary>Inherited from Remote for Apple TV (upstream)</summary>
@@ -86,6 +115,12 @@ will need to allow installation from unknown sources.
 
 Requires **Android 8.0 (API 26)** or newer, on the same Wi-Fi network as the
 Apple TV.
+
+Not yet on Google Play or F-Droid — see [`docs/fdroid/`](docs/fdroid/) for a
+ready-to-submit F-Droid build recipe. Play Store needs a developer account
+and its own signing/release setup first; F-Droid needs a merge request
+against their [fdroiddata](https://gitlab.com/fdroid/fdroiddata) repo once a
+tagged release exists for them to build from.
 
 ## Pairing
 
@@ -183,11 +218,16 @@ The Android module has grown its own moving parts:
 ```
 RemoteScreen.kt         D-pad, trackpad, transport, app drawer, now-playing card
 RemoteViewModel.kt      Connection ownership, reconnection, UI state
+CredentialStore.kt      Per-device registry: credentials plus connection metadata
 NowPlayingService.kt    Foreground service holding the MediaSession
 NotificationBridge.kt   Handoff between the view model and the notifications
 KeyboardNotification.kt Direct-reply prompt when the TV asks for text
 AppIcons.kt             App Store artwork lookup and disk cache
 SystemAppIcons.kt       Bundled artwork for Apple's own apps
+AppShortcuts.kt         Launcher shortcuts for the two most recent devices
+DeviceWidgetProvider.kt Home-screen widget, one instance per pinned device
+DeviceTileService.kt    The two Quick Settings tiles
+PuckTheme.kt            Material You dynamic color, with a static fallback
 ```
 
 ## Building
@@ -391,6 +431,9 @@ than Apple's own, which this project has no licence to redistribute.
 
 ## Security
 
+See also [PRIVACY.md](PRIVACY.md) for the plain-language version of what
+leaves your device and what doesn't.
+
 - Pairing credentials are encrypted with an AES-GCM key held in the Android
   Keystore, which on most devices is non-extractable. Backups are disabled,
   since Keystore-wrapped ciphertext cannot be restored onto other hardware.
@@ -418,6 +461,11 @@ Please run `./gradlew :protocol:test` before opening a pull request. If you
 change protocol behaviour, add a conformance vector rather than only a
 round-trip test: self-consistency proves nothing about what a real device
 accepts.
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+(`feat: ...`, `fix: ...`, `docs: ...`, and so on) — CI checks this on every
+pull request. `./gradlew :app:lintDebug` also runs in CI and is worth a local
+run before pushing.
 
 ## Licence
 

@@ -1,0 +1,66 @@
+# Draft F-Droid build recipe for Puck.
+#
+# This file is NOT consumed by anything in this repo or its CI — F-Droid
+# builds apps from a recipe living in their own fdroiddata repository, built
+# independently on their own infrastructure from a tagged commit, never from
+# an APK we upload. Submitting means opening a merge request against
+# https://gitlab.com/fdroid/fdroiddata adding a file at this same path
+# (metadata/dev.danielclements.puck.yml). This draft is kept here so that
+# step is "copy this file in and open an MR" rather than starting from
+# scratch. See https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/
+
+Categories:
+  - Multimedia
+  - System
+License: Apache-2.0
+AuthorName: Daniel Clements
+SourceCode: https://github.com/iamclements/puck
+IssueTracker: https://github.com/iamclements/puck/issues
+Changelog: https://github.com/iamclements/puck/releases
+
+# The Apple TV never sends app artwork for its app drawer, so the drawer
+# looks each bundle id up against Apple's public iTunes Search API — the
+# only network request this app makes beyond the LAN traffic to the Apple TV
+# itself. See PRIVACY.md and the README's Security section for the full
+# accounting. Flagged here per F-Droid's inclusion policy on apps that talk
+# to a non-free network service, even an unauthenticated public one.
+AntiFeatures:
+  - NonFreeNet
+
+AutoName: Puck
+Summary: Remote control for Apple TV
+Description: |-
+    An open-source Android remote for Apple TV, built to control more than
+    one of them. Speaks Apple's Companion Link protocol natively in Kotlin —
+    no companion server, no bridge, nothing else to run.
+
+    * Siri-Remote-style D-pad: tap a direction for one step, hold to repeat,
+      drag anywhere to pan and momentum-scroll
+    * Menu, Home, Play/Pause, Power (tap for Control Centre, hold to wake)
+    * App drawer with real tvOS app icons
+    * Text entry from your phone's keyboard, with a lock-screen reply prompt
+    * Now Playing: artwork, scrubber, skip, volume
+    * Media notification with full transport controls
+    * A home-screen widget and two Quick Settings tiles, each pinned to a
+      specific paired Apple TV
+    * Material You dynamic colour on Android 12+
+
+    Not affiliated with, authorized by, or endorsed by Apple Inc. "Apple",
+    "Apple TV", "AirPlay" and "Siri" are trademarks of Apple Inc., used here
+    solely to describe compatibility.
+
+RepoType: git
+Repo: https://github.com/iamclements/puck.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
