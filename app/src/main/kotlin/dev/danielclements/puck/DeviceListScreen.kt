@@ -188,7 +188,7 @@ private fun DeviceRow(
             )
         }
         Text(
-            if (paired) "Paired" else "Pair",
+            if (paired) stringResource(R.string.device_paired) else stringResource(R.string.device_pair),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = if (paired) MaterialTheme.colorScheme.primary

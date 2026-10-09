@@ -55,8 +55,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VolumeDown
@@ -577,25 +575,29 @@ private fun TouchPad(
             // select" — neither implies something you grab and move.
             Icon(
                 Icons.Default.KeyboardArrowUp,
-                contentDescription = null,
+                // Not independently focusable — the whole card is one custom
+                // gesture surface, not four discrete buttons — but TalkBack's
+                // touch exploration still reads this out as a finger passes
+                // over it, which is worth the real label.
+                contentDescription = stringResource(R.string.cd_up),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.Default.KeyboardArrowDown,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_down),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_left),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                 modifier = Modifier.align(Alignment.CenterStart).padding(start = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_right),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                 modifier = Modifier.align(Alignment.CenterEnd).padding(end = side * 0.04f).size(chevron),
             )
@@ -659,38 +661,6 @@ private const val RIM_COMMIT_DP = 40
  * a rim misread there plays as a 10 second skip in the player.
  */
 private const val CENTRE_COMMIT_DP = 60
-
-/**
- * One rim arrow: a tap target sitting in the ring between the pad edge and the
- * touch surface, sized as a fraction of the pad so it stays inside the ring.
- */
-@Composable
-private fun RimDirection(
-    button: Button,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    iconSize: Dp,
-    description: String,
-    onDirection: (Button) -> Unit,
-) {
-    val haptics = LocalHapticFeedback.current
-    Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .clickable {
-                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onDirection(button)
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            modifier = Modifier.size(iconSize),
-        )
-    }
-}
 
 @Composable
 private fun RoundButton(icon: ImageVector, description: String, onClick: () -> Unit) {

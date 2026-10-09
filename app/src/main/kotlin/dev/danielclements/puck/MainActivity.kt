@@ -60,6 +60,11 @@ class MainActivity : ComponentActivity() {
      * volume keys drive the TV's volume instead of the phone's. Key repeats
      * arrive as further ACTION_DOWNs, so holding a key steps continuously.
      */
+    // Lint's RestrictedApi check misfires on overriding this specific method:
+    // ComponentActivity.dispatchKeyEvent is a normal public override point,
+    // not actually restricted to androidx's own library group — a known
+    // false positive, not a real access violation.
+    @Suppress("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
             event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
