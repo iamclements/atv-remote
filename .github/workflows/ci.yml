@@ -26,6 +26,9 @@ jobs:
       - name: Protocol conformance tests
         run: ./gradlew :protocol:test
 
+      - name: Android Lint
+        run: ./gradlew :app:lintDebug
+
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug
 
@@ -35,3 +38,22 @@ jobs:
         with:
           name: test-report
           path: protocol/build/reports/tests/test/
+
+      - name: Upload lint report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+
+  commitlint:
+    # Only meaningful on a PR: a push to main has no "range" of new commits to
+    # lint against — main's own history, upstream's included, predates this
+    # convention and isn't going to be rewritten to match it.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6

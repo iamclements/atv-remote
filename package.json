@@ -1,0 +1,9 @@
+{
+  "name": "puck-commitlint",
+  "private": true,
+  "description": "Not a Node project — this file exists only so CI can resolve @commitlint/config-conventional for the commitlint GitHub Action.",
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0"
+  }
+}
