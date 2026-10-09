@@ -1,5 +1,9 @@
 # Build the launcher-icon path once, then emit it as both an Android vector
 # drawable and an SVG, so the shipped XML can be verified by rendering.
+import os
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 VIEW = 108.0        # adaptive icon viewport (dp)
 VISIBLE = 72.0      # diameter the launcher actually shows
 
@@ -71,6 +75,10 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewB
 </svg>
 '''
 
-open("/home/msthind/Projects/AppleTV-Remote/app/src/main/res/drawable/ic_launcher_foreground.xml", "w").write(vector)
-open("/tmp/claude-1000/-home-msthind-Projects-AppleTV-Remote/0fb61d80-f75c-4048-86ee-fa917b7fea9f/scratchpad/icon_check.svg", "w").write(svg)
-print("path length:", len(path), "chars")
+drawable_path = os.path.join(REPO_ROOT, "app/src/main/res/drawable/ic_launcher_foreground.xml")
+svg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon_check.svg")
+open(drawable_path, "w").write(vector)
+open(svg_path, "w").write(svg)
+print(f"path length: {len(path)} chars")
+print(f"wrote {drawable_path}")
+print(f"wrote {svg_path}")

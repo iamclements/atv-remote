@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 import math
+import os
 
 S = 4                      # supersampling factor
 CANVAS = 432               # adaptive-icon canvas (108dp @ 4x)
@@ -92,5 +93,6 @@ for i, (name, bg, body, hole) in enumerate(VARIANTS):
                 mask(icon, "squircle"))
 
 sd.text((pad, label_h + CANVAS + pad // 3), "circle mask", fill=(90, 90, 95, 255))
-sheet.save("/tmp/claude-1000/-home-msthind-Projects-AppleTV-Remote/0fb61d80-f75c-4048-86ee-fa917b7fea9f/scratchpad/icon_preview.png")
-print("wrote preview", sheet.size)
+out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon_preview.png")
+sheet.save(out_path)
+print(f"wrote preview {sheet.size} -> {out_path}")
