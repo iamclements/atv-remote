@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      "<Product> for Apple TV" is the referential form Apple's trademark
-      guidelines permit; "Apple TV <Product>" would imply an Apple product.
+      Short, for where the OS shows it at icon scale (app drawer, recents,
+      Settings > Apps, the widget picker). The fuller "Puck — Remote for
+      Apple TVs" ("<Product> for Apple TV" is the referential form Apple's
+      trademark guidelines permit; "Apple TV <Product>" would imply an
+      Apple product) is a Play Store listing title, set independently in
+      Play Console — not read from this string.
     -->
-    <string name="app_name">Puck — Remote for Apple TVs</string>
+    <string name="app_name">Puck</string>
     <string name="disclaimer">Not affiliated with Apple Inc. Apple TV and AirPlay are trademarks of Apple Inc.</string>
 
     <!-- Device list -->
-    <!-- Short form of app_name for the on-screen heading, which wraps to two
-         lines at this font size if it carries the full descriptive title. -->
-    <string name="home_title">Puck</string>
     <string name="devices_subtitle">Devices on your network</string>
     <string name="shortcut_long_label">Open %1$s</string>
 

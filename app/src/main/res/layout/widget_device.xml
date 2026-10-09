@@ -11,10 +11,11 @@
 
     <ImageView
         android:id="@+id/widget_icon"
-        android:layout_width="32dp"
-        android:layout_height="20dp"
+        android:layout_width="16dp"
+        android:layout_height="37dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_app_tv"
+        android:src="@drawable/ic_widget_remote"
+        android:tint="@color/widget_on_background"
         android:contentDescription="@null" />
 
     <TextView

@@ -48,7 +48,7 @@ fun DeviceListScreen(state: UiState, vm: RemoteViewModel) {
             .padding(24.dp)
     ) {
         Text(
-            stringResource(R.string.home_title),
+            stringResource(R.string.app_name),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,

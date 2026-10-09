@@ -156,7 +156,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                 contentDescription = stringResource(R.string.cd_disconnect),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .clickable { vm.disconnect() }
                     .padding(8.dp),
@@ -187,7 +187,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                 tint = if (state.keyboardOpen) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .clickable { vm.toggleKeyboard() }
                     .padding(8.dp),
@@ -199,7 +199,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                 tint = if (showApps) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .clickable { showApps = !showApps }
                     .padding(8.dp),
@@ -215,7 +215,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                 contentDescription = stringResource(R.string.cd_power),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .combinedClickable(
                         onClick = { vm.holdHome() },
@@ -352,12 +352,12 @@ private fun VolumeRow(vm: RemoteViewModel) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // A touch taller than the icon alone so the row balances against the
-        // 64 dp transport buttons above it instead of looking squeezed.
-        PillButton(Icons.Default.VolumeDown, stringResource(R.string.volume_down), Modifier.weight(1f).height(52.dp)) {
+        // 76 dp transport buttons above it instead of looking squeezed.
+        PillButton(Icons.Default.VolumeDown, stringResource(R.string.volume_down), Modifier.weight(1f).height(60.dp)) {
             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             vm.volumeDown()
         }
-        PillButton(Icons.Default.VolumeUp, stringResource(R.string.volume_up), Modifier.weight(1f).height(52.dp)) {
+        PillButton(Icons.Default.VolumeUp, stringResource(R.string.volume_up), Modifier.weight(1f).height(60.dp)) {
             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             vm.volumeUp()
         }
@@ -679,7 +679,7 @@ private fun RimDirection(
 private fun RoundButton(icon: ImageVector, description: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(64.dp)
+            .size(76.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
             .clickable(onClick = onClick),
@@ -689,7 +689,7 @@ private fun RoundButton(icon: ImageVector, description: String, onClick: () -> U
             icon,
             contentDescription = description,
             tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(30.dp),
         )
     }
 }
