@@ -8,7 +8,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -565,33 +564,17 @@ private fun TouchPad(
         ) {
             // Visual affordances only — the gesture handling above already
             // treats the whole card as one live surface regardless of what's
-            // drawn here. The cross-hair and chevrons read as a D-pad; the
-            // centre circle reads as a button; together they say "tap a
-            // quadrant or press the middle" without hiding that a drag
-            // anywhere also works.
-            val guideColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
-            Canvas(Modifier.fillMaxSize()) {
-                val inset = this.size.minDimension * 0.06f
-                drawLine(
-                    color = guideColor,
-                    start = Offset(this.size.width / 2f, inset),
-                    end = Offset(this.size.width / 2f, this.size.height - inset),
-                    strokeWidth = 2.dp.toPx(),
-                )
-                drawLine(
-                    color = guideColor,
-                    start = Offset(inset, this.size.height / 2f),
-                    end = Offset(this.size.width - inset, this.size.height / 2f),
-                    strokeWidth = 2.dp.toPx(),
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(side * 0.42f)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f), CircleShape),
-            )
+            // drawn here.
+            //
+            // Deliberately NOT a centre knob with cross-hair axes: that reads
+            // as an analogue joystick you drag around, which is the wrong
+            // mental model entirely. There is nothing analogue here — a rim
+            // tap is one discrete step, a rim hold repeats that one step
+            // (tvOS repeats the held HID key itself), and a drag anywhere
+            // is the only continuous motion, panning the real cursor the
+            // way a swipe on the hardware remote does. The arrows alone say
+            // "tap a quadrant for one step"; "OK" alone says "press here to
+            // select" — neither implies something you grab and move.
             Icon(
                 Icons.Default.KeyboardArrowUp,
                 contentDescription = null,
@@ -615,6 +598,13 @@ private fun TouchPad(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                 modifier = Modifier.align(Alignment.CenterEnd).padding(end = side * 0.04f).size(chevron),
+            )
+            Text(
+                stringResource(R.string.select),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
             )
         }
     }

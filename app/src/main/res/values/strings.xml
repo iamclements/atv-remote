@@ -53,6 +53,7 @@
     <string name="volume_percent">Volume %1$d%%</string>
 
     <!-- Pad and transport -->
+    <string name="select">OK</string>
     <string name="cd_up">Up</string>
     <string name="cd_down">Down</string>
     <string name="cd_left">Left</string>
