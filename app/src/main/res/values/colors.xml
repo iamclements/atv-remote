@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget backgrounds: RemoteViews can't read Compose's dynamic color,
+         so these mirror PuckTheme's static light/dark fallback surfaces. -->
+    <color name="widget_background">#FFFFFFFF</color>
+    <color name="widget_on_background">#FF1A1A1C</color>
+</resources>

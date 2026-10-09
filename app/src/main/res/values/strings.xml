@@ -13,6 +13,15 @@
     <string name="home_title">Puck</string>
     <string name="devices_subtitle">Devices on your network</string>
     <string name="shortcut_long_label">Open %1$s</string>
+
+    <!-- Home-screen widget -->
+    <string name="widget_unconfigured">Puck</string>
+    <string name="widget_pick_device_title">Choose a TV for this widget</string>
+    <string name="widget_pick_device_empty">Pair with an Apple TV in the app first, then add this widget.</string>
+
+    <!-- Quick Settings tiles -->
+    <string name="tile_unconfigured_label">Puck</string>
+    <string name="tile_subtitle">Tap to open</string>
     <string name="device_paired">Paired</string>
     <string name="device_pair">Pair</string>
     <string name="scan_again">Scan again</string>

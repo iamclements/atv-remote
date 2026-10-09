@@ -80,10 +80,11 @@ class CredentialStore(context: Context) {
 
     /**
      * Every device that has a companion pairing, excluding the AirPlay
-     * second-pairing entries and the last-device note.
+     * second-pairing entries, the last-device note, and the per-device
+     * metadata keys saveDevice() writes alongside the real credential key.
      */
     fun pairedKeys(): Set<String> = prefs.all.keys
-        .filter { !it.endsWith("-airplay") && !it.startsWith("last-") }
+        .filter { !it.endsWith("-airplay") && !it.startsWith("last-") && !it.startsWith("meta-") }
         .toSet()
 
     /**

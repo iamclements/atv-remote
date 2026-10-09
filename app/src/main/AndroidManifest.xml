@@ -46,5 +46,60 @@
             android:name=".NowPlayingService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Home-screen widget: a 1x1 tile pinned to one specific Apple TV. -->
+        <receiver
+            android:name=".DeviceWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/device_widget_info" />
+        </receiver>
+
+        <!--
+          Exported because the system launches it on the widget host's behalf
+          when a widget is dragged onto the home screen; it only ever reads
+          this app's own paired-device list.
+        -->
+        <activity
+            android:name=".DeviceWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Puck">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Two Quick Settings tiles, each tracking one of the same "most
+          recently used" slots as the launcher shortcuts (AppShortcuts) —
+          Quick Settings has no per-tile configuration step at add-time the
+          way widgets do, so there's no user-facing way to bind a specific
+          tile to a specific device the way the widget does.
+        -->
+        <service
+            android:name=".DeviceTileOne"
+            android:exported="true"
+            android:icon="@drawable/ic_app_tv"
+            android:label="@string/tile_unconfigured_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".DeviceTileTwo"
+            android:exported="true"
+            android:icon="@drawable/ic_app_tv"
+            android:label="@string/tile_unconfigured_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
