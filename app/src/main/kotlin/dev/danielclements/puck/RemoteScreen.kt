@@ -8,6 +8,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -395,14 +396,18 @@ private fun TouchPad(
         contentAlignment = Alignment.Center,
     ) {
         val side = minOf(maxWidth, maxHeight)
-        val chevron = (side * 0.09f).coerceAtMost(30.dp)
+        val chevron = (side * 0.1f).coerceAtMost(34.dp)
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(side)
                 .clip(RoundedCornerShape(28.dp))
-                .background(MaterialTheme.colorScheme.surface)
+                // surfaceVariant rather than surface: needs to read as a
+                // clearly bounded control against the page background, not
+                // blend into it — the whole card is the live touch surface,
+                // so its edges are the only cue that it's there at all.
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .pointerInput(Unit) {
                     val centre = 500f
                     // Frac is measured against a fixed 300 dp reference pad —
@@ -558,36 +563,58 @@ private fun TouchPad(
                 },
             contentAlignment = Alignment.Center,
         ) {
-            // Visual affordances only: the centre circle and the rim chevrons.
+            // Visual affordances only — the gesture handling above already
+            // treats the whole card as one live surface regardless of what's
+            // drawn here. The cross-hair and chevrons read as a D-pad; the
+            // centre circle reads as a button; together they say "tap a
+            // quadrant or press the middle" without hiding that a drag
+            // anywhere also works.
+            val guideColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
+            Canvas(Modifier.fillMaxSize()) {
+                val inset = this.size.minDimension * 0.06f
+                drawLine(
+                    color = guideColor,
+                    start = Offset(this.size.width / 2f, inset),
+                    end = Offset(this.size.width / 2f, this.size.height - inset),
+                    strokeWidth = 2.dp.toPx(),
+                )
+                drawLine(
+                    color = guideColor,
+                    start = Offset(inset, this.size.height / 2f),
+                    end = Offset(this.size.width - inset, this.size.height / 2f),
+                    strokeWidth = 2.dp.toPx(),
+                )
+            }
             Box(
                 modifier = Modifier
-                    .size(side * 0.6f)
+                    .size(side * 0.42f)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f), CircleShape),
             )
             Icon(
                 Icons.Default.KeyboardArrowUp,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = side * 0.02f).size(chevron),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.Default.KeyboardArrowDown,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = side * 0.02f).size(chevron),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.CenterStart).padding(start = side * 0.02f).size(chevron),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                modifier = Modifier.align(Alignment.CenterStart).padding(start = side * 0.04f).size(chevron),
             )
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.CenterEnd).padding(end = side * 0.02f).size(chevron),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = side * 0.04f).size(chevron),
             )
         }
     }
