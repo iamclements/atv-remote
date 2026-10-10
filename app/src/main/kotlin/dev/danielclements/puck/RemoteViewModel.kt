@@ -558,8 +558,16 @@ class RemoteViewModel(
     /** Drop the Companion pairing and stop listing the device as paired. */
     private fun forgetPairing(device: AppleTvDevice) {
         store.forget(device.credentialKey)
-        _state.update { it.copy(pairedKeys = it.pairedKeys - device.credentialKey) }
+        // Otherwise a Now Playing pairing survives the device it belongs to
+        // being forgotten — an orphaned, never-cleaned-up credential for a
+        // device the app no longer otherwise knows about.
+        store.forgetAirPlay(device.credentialKey)
+        _state.update { it.copy(pairedKeys = it.pairedKeys - device.credentialKey, airplayPaired = false) }
         AppShortcuts.sync(getApplication(), store)
+        // Otherwise a widget pinned to this device keeps showing it, and
+        // keeps launching straight into it, indefinitely — nothing else
+        // about the widget lifecycle would ever notice it was forgotten.
+        DeviceWidgetProvider.refreshAll(getApplication())
     }
 
     private fun str(id: Int, vararg args: Any?): String =
@@ -611,6 +619,11 @@ class RemoteViewModel(
                 store.saveLastDevice(device)
                 store.saveDevice(device)
                 AppShortcuts.sync(getApplication(), store)
+                // A widget bound to this device may be showing a stale name
+                // (or the stale-binding "tap to configure" placeholder, if
+                // it predates this re-pairing) — refresh it now that the
+                // metadata backing it has changed.
+                DeviceWidgetProvider.refreshAll(getApplication())
                 // Now-playing must come up on every connect. Previously this
                 // only ran straight after AirPlay pairing, so it silently
                 // stopped working on the next app start.

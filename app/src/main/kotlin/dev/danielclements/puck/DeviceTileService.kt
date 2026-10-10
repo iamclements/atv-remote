@@ -49,7 +49,7 @@ abstract class DeviceTileServiceBase(private val slot: Int) : TileService() {
         val tile = qsTile ?: return
         val device = CredentialStore(this).recentDevices(slot + 1).getOrNull(slot)
         tile.label = device?.name ?: getString(R.string.tile_unconfigured_label)
-        tile.icon = Icon.createWithResource(this, R.drawable.ic_app_tv)
+        tile.icon = Icon.createWithResource(this, R.drawable.ic_widget_remote)
         tile.state = if (device != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             tile.subtitle = if (device != null) getString(R.string.tile_subtitle) else null
