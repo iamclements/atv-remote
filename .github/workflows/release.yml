@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # release notes need the previous tag's history
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -51,9 +53,15 @@ jobs:
         if: always()
         run: rm -f app/release.jks keystore.properties
 
+      - name: Build release notes from Conventional Commits
+        env:
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: python3 tools/release_notes.py
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/app-release.apk
-          generate_release_notes: true
+          files: app/build/outputs/apk/release/puck-*.apk
+          body_path: RELEASE_NOTES.md
           draft: false

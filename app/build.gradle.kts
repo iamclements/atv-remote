@@ -88,6 +88,21 @@ kotlin {
     }
 }
 
+// Otherwise every release and debug build produces an identically named
+// app-release.apk / app-debug.apk, indistinguishable once it's off the
+// build machine — a GitHub release asset with no version in its filename.
+// outputFileName is only settable on the impl class; the public
+// VariantOutput interface exposes it read-only.
+androidComponents {
+    onVariants { variant ->
+        val suffix = if (variant.buildType == "debug") "-debug" else ""
+        variant.outputs.forEach { output ->
+            (output as? com.android.build.api.variant.impl.VariantOutputImpl)
+                ?.outputFileName?.set("puck-${android.defaultConfig.versionName}$suffix.apk")
+        }
+    }
+}
+
 dependencies {
     implementation(project(":protocol"))
 
