@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,12 +48,25 @@ fun DeviceListScreen(state: UiState, vm: RemoteViewModel) {
             .windowInsetsPadding(WindowInsets.systemBars)
             .padding(24.dp)
     ) {
-        Text(
-            stringResource(R.string.app_name),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.app_name),
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                Icons.Default.Settings,
+                contentDescription = stringResource(R.string.cd_settings),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .clickable { vm.openSettings() }
+                    .padding(10.dp),
+            )
+        }
         Spacer(Modifier.height(4.dp))
         Text(
             stringResource(R.string.devices_subtitle),

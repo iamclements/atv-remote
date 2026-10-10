@@ -55,13 +55,14 @@ class CredentialStore(context: Context) {
     fun loadLastDevice(): AppleTvDevice? {
         val name = prefs.getString("last-name", null) ?: return null
         val address = prefs.getString("last-address", null) ?: return null
-        return AppleTvDevice(
+        val device = AppleTvDevice(
             name = name,
             address = address,
             port = prefs.getInt("last-port", 0),
             model = prefs.getString("last-model", null),
             identifier = prefs.getString("last-identifier", null),
         )
+        return applyDisplayName(device)
     }
 
     fun forget(key: String) {
@@ -73,6 +74,7 @@ class CredentialStore(context: Context) {
             .remove("meta-$key-model")
             .remove("meta-$key-identifier")
             .remove("meta-$key-usedAt")
+            .remove("meta-$key-displayName")
             .apply()
     }
 
@@ -111,12 +113,30 @@ class CredentialStore(context: Context) {
         val name = prefs.getString("meta-$key-name", null) ?: return null
         val address = prefs.getString("meta-$key-address", null) ?: return null
         return AppleTvDevice(
-            name = name,
+            name = displayName(key) ?: name,
             address = address,
             port = prefs.getInt("meta-$key-port", 0),
             model = prefs.getString("meta-$key-model", null),
             identifier = prefs.getString("meta-$key-identifier", null),
         )
+    }
+
+    /**
+     * A name the user picked from the Manage Devices screen, overriding
+     * whatever the Apple TV itself advertises — useful when a TV's mDNS name
+     * is something like "Living Room" already taken by another room's TV, or
+     * just not what the user wants to see.
+     */
+    fun displayName(key: String): String? = prefs.getString("meta-$key-displayName", null)
+
+    fun setDisplayName(key: String, name: String) {
+        prefs.edit().putString("meta-$key-displayName", name).apply()
+    }
+
+    /** Applies [displayName]'s override, if one is set, to an otherwise fresh device. */
+    fun applyDisplayName(device: AppleTvDevice): AppleTvDevice {
+        val override = displayName(device.credentialKey) ?: return device
+        return if (override == device.name) device else device.copy(name = override)
     }
 
     /** Paired devices ordered by most recently connected to, for shortcuts. */

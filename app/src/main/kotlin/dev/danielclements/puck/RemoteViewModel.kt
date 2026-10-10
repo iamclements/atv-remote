@@ -47,6 +47,8 @@ sealed interface Screen {
     data object DeviceList : Screen
     data class PinEntry(val device: AppleTvDevice, val forAirPlay: Boolean = false) : Screen
     data class Remote(val device: AppleTvDevice) : Screen
+    data object Settings : Screen
+    data object ManageDevices : Screen
 }
 
 data class UiState(
@@ -82,6 +84,9 @@ data class UiState(
     val padMode: PadMode = PadMode.DPAD,
     val error: String? = null,
     val pairedKeys: Set<String> = emptySet(),
+    val settings: AppSettings = AppSettings(),
+    /** Every paired device, for the Manage Devices screen — unlike [devices], not tied to a live scan. */
+    val managedDevices: List<AppleTvDevice> = emptyList(),
 )
 
 /**
@@ -134,6 +139,7 @@ class RemoteViewModel(
 
     private val discovery = NsdDiscovery(app)
     private val store = CredentialStore(app)
+    private val settingsStore = SettingsStore(app)
 
     /** Sent during pairing; it is what the Apple TV lists us as. */
     private val deviceName = app.ownDeviceName()
@@ -154,7 +160,7 @@ class RemoteViewModel(
     // null — the intermittent startup crash.
     private val touchInput = Channel<TouchSample>(Channel.UNLIMITED)
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(settings = settingsStore.load()))
     val state: StateFlow<UiState> = _state.asStateFlow()
 
     /** Whether the media notification's service has been asked to run. */
@@ -288,6 +294,58 @@ class RemoteViewModel(
 
     fun dismissError() = _state.update { it.copy(error = null) }
 
+    // --------------------------------------------------------------- settings
+
+    fun openSettings() = _state.update { it.copy(screen = Screen.Settings) }
+
+    fun closeSettings() = _state.update { it.copy(screen = Screen.DeviceList) }
+
+    fun setHaptics(enabled: Boolean) {
+        settingsStore.setHaptics(enabled)
+        _state.update { it.copy(settings = it.settings.copy(hapticsEnabled = enabled)) }
+    }
+
+    fun setButtonSound(enabled: Boolean) {
+        settingsStore.setButtonSound(enabled)
+        _state.update { it.copy(settings = it.settings.copy(buttonSoundEnabled = enabled)) }
+    }
+
+    fun setSensitivity(value: TouchSensitivity) {
+        settingsStore.setSensitivity(value)
+        _state.update { it.copy(settings = it.settings.copy(sensitivity = value)) }
+    }
+
+    fun openManageDevices() {
+        refreshManagedDevices()
+        _state.update { it.copy(screen = Screen.ManageDevices) }
+    }
+
+    fun closeManageDevices() = _state.update { it.copy(screen = Screen.Settings) }
+
+    private fun refreshManagedDevices() {
+        val devices = store.pairedKeys().mapNotNull { store.loadDevice(it) }.sortedBy { it.name }
+        _state.update { it.copy(managedDevices = devices) }
+    }
+
+    /** Renames a paired device everywhere its name is shown — overrides what the TV itself advertises. */
+    fun renameDevice(device: AppleTvDevice, newName: String) {
+        val trimmed = newName.trim()
+        if (trimmed.isEmpty() || trimmed == device.name) return
+        store.setDisplayName(device.credentialKey, trimmed)
+        AppShortcuts.sync(getApplication(), store)
+        DeviceWidgetProvider.refreshAll(getApplication())
+        refreshManagedDevices()
+        _state.update { s ->
+            s.copy(devices = s.devices.map { if (it.credentialKey == device.credentialKey) it.copy(name = trimmed) else it })
+        }
+    }
+
+    /** Drops a paired device from the Manage Devices screen, without needing it to be the active connection. */
+    fun forgetManagedDevice(device: AppleTvDevice) {
+        forgetPairing(device)
+        refreshManagedDevices()
+    }
+
     /**
      * Straight into the remote when exactly one pairing exists — the common
      * single-TV case; the back arrow on the remote returns to the list. With
@@ -337,6 +395,7 @@ class RemoteViewModel(
         viewModelScope.launch {
             val found = runCatching { discovery.scan(5000, ::onDeviceResolved) }
                 .getOrDefault(emptyList())
+                .map { store.applyDisplayName(it) }
             _state.update { s ->
                 // A paired device that is asleep will not answer discovery;
                 // keep it listed rather than dropping it off the screen.
@@ -355,7 +414,8 @@ class RemoteViewModel(
     }
 
     /** Merge a freshly resolved device into the list without duplicates. */
-    private fun onDeviceResolved(device: AppleTvDevice) {
+    private fun onDeviceResolved(rawDevice: AppleTvDevice) {
+        val device = store.applyDisplayName(rawDevice)
         _state.update { s ->
             if (s.devices.any { it.credentialKey == device.credentialKey }) s
             else s.copy(
@@ -524,9 +584,11 @@ class RemoteViewModel(
             // often already stale by the time we need to reconnect --
             // connecting to it yields "Connection refused". Rediscover first
             // and fall back to what we knew if the scan turns up nothing.
-            val device = runCatching {
-                discovery.scan(4000).firstOrNull { it.credentialKey == known.credentialKey }
-            }.getOrNull() ?: known
+            val device = store.applyDisplayName(
+                runCatching {
+                    discovery.scan(4000).firstOrNull { it.credentialKey == known.credentialKey }
+                }.getOrNull() ?: known,
+            )
             currentDevice = device
 
             val r = establish(device, credentials)

@@ -117,6 +117,8 @@ private fun AppRoot(vm: RemoteViewModel = viewModel()) {
             is Screen.DeviceList -> DeviceListScreen(state, vm)
             is Screen.PinEntry -> PinEntryScreen(screen.device, state, vm)
             is Screen.Remote -> RemoteScreen(screen.device, state, vm)
+            is Screen.Settings -> SettingsScreen(state, vm)
+            is Screen.ManageDevices -> ManageDevicesScreen(state, vm)
         }
     }
 }

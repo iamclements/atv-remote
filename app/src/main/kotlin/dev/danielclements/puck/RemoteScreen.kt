@@ -91,6 +91,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import android.view.SoundEffectConstants
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -128,7 +130,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
     BackHandler(enabled = showApps) { showApps = false }
     // A hold has no on-screen feedback of its own, so the buzz is the only
     // signal that it registered rather than a tap.
-    val haptics = LocalHapticFeedback.current
+    val feedback = rememberFeedback(state.settings.hapticsEnabled, state.settings.buttonSoundEnabled)
 
     BoxWithConstraints(
         modifier = Modifier
@@ -218,7 +220,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                     .combinedClickable(
                         onClick = { vm.holdHome() },
                         onLongClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            feedback(HapticFeedbackType.LongPress)
                             vm.wake()
                         },
                     )
@@ -275,8 +277,11 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
             ) {
                 TouchPad(
                     modifier = Modifier.fillMaxSize(),
+                    hapticsEnabled = state.settings.hapticsEnabled,
+                    soundEnabled = state.settings.buttonSoundEnabled,
+                    sensitivity = state.settings.sensitivity.multiplier,
                     onDirectionDown = {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        feedback(HapticFeedbackType.TextHandleMove)
                         vm.padDirectionDown(it)
                     },
                     onDirectionUp = { vm.padDirectionUp(it) },
@@ -295,7 +300,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
             Spacer(Modifier.weight(1f))
             TransportRow(state, vm)
             Spacer(Modifier.weight(1f))
-            VolumeRow(vm)
+            VolumeRow(state, vm)
             Spacer(Modifier.weight(1f))
         }
 
@@ -323,11 +328,15 @@ private fun NowPlayingSection(
 
 @Composable
 private fun TransportRow(state: UiState, vm: RemoteViewModel) {
+    val feedback = rememberFeedback(state.settings.hapticsEnabled, state.settings.buttonSoundEnabled)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        RoundButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.menu)) { vm.press(Button.MENU) }
+        RoundButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.menu)) {
+            feedback(HapticFeedbackType.TextHandleMove)
+            vm.press(Button.MENU)
+        }
 
         // One button toggles playback, so it shows the action it will
         // perform. Without now-playing there is no state to reflect, and
@@ -336,15 +345,21 @@ private fun TransportRow(state: UiState, vm: RemoteViewModel) {
         RoundButton(
             icon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             description = stringResource(if (isPlaying) R.string.pause else R.string.play),
-        ) { vm.press(Button.PLAY_PAUSE) }
+        ) {
+            feedback(HapticFeedbackType.TextHandleMove)
+            vm.press(Button.PLAY_PAUSE)
+        }
 
-        RoundButton(Icons.Default.Home, stringResource(R.string.home)) { vm.press(Button.HOME) }
+        RoundButton(Icons.Default.Home, stringResource(R.string.home)) {
+            feedback(HapticFeedbackType.TextHandleMove)
+            vm.press(Button.HOME)
+        }
     }
 }
 
 @Composable
-private fun VolumeRow(vm: RemoteViewModel) {
-    val haptics = LocalHapticFeedback.current
+private fun VolumeRow(state: UiState, vm: RemoteViewModel) {
+    val feedback = rememberFeedback(state.settings.hapticsEnabled, state.settings.buttonSoundEnabled)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -352,11 +367,11 @@ private fun VolumeRow(vm: RemoteViewModel) {
         // A touch taller than the icon alone so the row balances against the
         // 76 dp transport buttons above it instead of looking squeezed.
         PillButton(Icons.Default.VolumeDown, stringResource(R.string.volume_down), Modifier.weight(1f).height(60.dp)) {
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.TextHandleMove)
             vm.volumeDown()
         }
         PillButton(Icons.Default.VolumeUp, stringResource(R.string.volume_up), Modifier.weight(1f).height(60.dp)) {
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.TextHandleMove)
             vm.volumeUp()
         }
     }
@@ -379,6 +394,9 @@ private fun VolumeRow(vm: RemoteViewModel) {
 @Composable
 private fun TouchPad(
     modifier: Modifier = Modifier,
+    hapticsEnabled: Boolean = true,
+    soundEnabled: Boolean = false,
+    sensitivity: Float = 1f,
     onDirectionDown: (Button) -> Unit,
     onDirectionUp: (Button) -> Unit,
     onSelect: () -> Unit,
@@ -386,7 +404,7 @@ private fun TouchPad(
     onSelectUp: () -> Unit,
     onTouch: (x: Int, y: Int, phase: TouchPhase) -> Unit,
 ) {
-    val haptics = LocalHapticFeedback.current
+    val feedback = rememberFeedback(hapticsEnabled, soundEnabled)
 
     BoxWithConstraints(
         modifier = modifier,
@@ -419,7 +437,7 @@ private fun TouchPad(
                     val centreRadius = minOf(size.width, size.height) * 0.38f
 
                     fun direction(pos: Offset) {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        feedback(HapticFeedbackType.TextHandleMove)
                         val dx = pos.x - size.width / 2f
                         val dy = pos.y - size.height / 2f
                         val button = if (abs(dx) > abs(dy)) {
@@ -481,9 +499,9 @@ private fun TouchPad(
                             val fracY = (pos.y - lastPos.y) / refPx
                             val speed = hypot(fracX, fracY) / dt
                             val gain = TouchAcceleration.gain(speed)
-                            vx = (vx + fracX * 1000f * gain * HORIZONTAL_SENSITIVITY)
+                            vx = (vx + fracX * 1000f * gain * HORIZONTAL_SENSITIVITY * sensitivity)
                                 .coerceIn(0f, 1000f)
-                            vy = (vy + fracY * 1000f * gain * VERTICAL_SENSITIVITY)
+                            vy = (vy + fracY * 1000f * gain * VERTICAL_SENSITIVITY * sensitivity)
                                 .coerceIn(0f, 1000f)
                             lastPos = pos
                             lastTime = time
@@ -647,6 +665,22 @@ private fun Modifier.repeatOnHold(
 // moves the focus the same distance whichever way you swipe.
 private const val HORIZONTAL_SENSITIVITY = 1.0f
 private const val VERTICAL_SENSITIVITY = 1.0f
+
+/**
+ * A haptic buzz, plus an optional system click sound, for a discrete button
+ * press — gated by the user's Settings toggles rather than always firing.
+ */
+@Composable
+private fun rememberFeedback(hapticsEnabled: Boolean, soundEnabled: Boolean): (HapticFeedbackType) -> Unit {
+    val haptics = LocalHapticFeedback.current
+    val view = LocalView.current
+    return remember(hapticsEnabled, soundEnabled, haptics, view) {
+        { type: HapticFeedbackType ->
+            if (hapticsEnabled) haptics.performHapticFeedback(type)
+            if (soundEnabled) view.playSoundEffect(SoundEffectConstants.CLICK)
+        }
+    }
+}
 
 /**
  * How far the finger must travel before a gesture commits as a swipe. Below
