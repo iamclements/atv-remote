@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Deliberately styled to read as a normal app icon with a label underneath
+  (same charcoal/white as the launcher icon) rather than a themed card —
+  on most launchers a 1x1 widget sits in the grid indistinguishably from
+  any other icon, and a custom card shape stood out as obviously not one.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_card_background"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="8dp">
+    android:gravity="center">
 
     <ImageView
         android:id="@+id/widget_icon"
-        android:layout_width="16dp"
-        android:layout_height="37dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/widget_icon_background"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_widget_remote"
-        android:tint="@color/widget_on_background"
+        android:src="@drawable/ic_launcher_foreground"
         android:contentDescription="@null" />
 
     <TextView
@@ -24,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center"
-        android:maxLines="2"
+        android:maxLines="1"
         android:ellipsize="end"
         android:textSize="11sp"
         android:textColor="@color/widget_on_background"
