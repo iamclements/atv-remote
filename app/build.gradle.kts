@@ -24,8 +24,8 @@ android {
         targetSdk = 35
         // Restarted at 1: this is a distinct app/listing from upstream's
         // dev.atvremote.app, not an update to it.
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         // English-only: keeps any translated strings a dependency ships
         // (e.g. a library's own "OK"/"Cancel") out of the APK too, not just
