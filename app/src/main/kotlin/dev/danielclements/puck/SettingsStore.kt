@@ -4,9 +4,9 @@ import android.content.Context
 
 /** How strongly a drag on the touch pad translates into on-screen movement. */
 enum class TouchSensitivity(val multiplier: Float) {
-    LOW(0.7f),
-    MEDIUM(1.0f),
-    HIGH(1.4f),
+    LOW(0.8f),
+    MEDIUM(1.2f),
+    HIGH(1.8f),
 }
 
 data class AppSettings(

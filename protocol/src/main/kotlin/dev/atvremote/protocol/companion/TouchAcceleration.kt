@@ -21,9 +21,9 @@ package dev.atvremote.protocol.companion
  */
 object TouchAcceleration {
     const val GAIN_MIN = 1.0f
-    const val GAIN_MAX = 1.5f
-    const val SPEED_SLOW = 0.8f
-    const val SPEED_FAST = 7.5f
+    const val GAIN_MAX = 3.0f
+    const val SPEED_SLOW = 0.5f
+    const val SPEED_FAST = 4.0f
 
     fun gain(speedFracPerSec: Float): Float {
         if (speedFracPerSec <= SPEED_SLOW) return GAIN_MIN
