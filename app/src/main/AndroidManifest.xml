@@ -80,6 +80,20 @@
           way widgets do, so there's no user-facing way to bind a specific
           tile to a specific device the way the widget does.
         -->
+        <!--
+          Long-pressing either tile opens this to pick which Apple TV it's
+          pinned to — Quick Settings has no add-time configuration step the
+          way widgets do, so this is the only hook Android gives for it.
+        -->
+        <activity
+            android:name=".TileConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Puck">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".DeviceTileOne"
             android:exported="true"

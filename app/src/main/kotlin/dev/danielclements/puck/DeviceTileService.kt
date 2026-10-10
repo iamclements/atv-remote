@@ -6,16 +6,18 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import dev.atvremote.protocol.discovery.AppleTvDevice
 
 /**
- * A Quick Settings tile bound to "the Nth most recently used Apple TV,"
- * mirroring the two long-press launcher shortcuts ([AppShortcuts]).
+ * A Quick Settings tile pinned to one specific, already-paired Apple TV,
+ * chosen via a long-press (see [TileConfigActivity]) — mirroring what the
+ * home-screen widget does.
  *
  * Android doesn't let an app spawn one tile per paired device dynamically —
  * each tile is a separately declared component the user adds by hand from
- * the Quick Settings editor — so this follows the same fixed-slot design as
- * the shortcuts rather than offering per-tile device selection like the
- * home-screen widget does.
+ * the Quick Settings editor — so there are a fixed two slots. Until a slot
+ * is explicitly bound, it falls back to "the Nth most recently used Apple
+ * TV," same as the long-press launcher shortcuts ([AppShortcuts]).
  */
 abstract class DeviceTileServiceBase(private val slot: Int) : TileService() {
 
@@ -26,7 +28,7 @@ abstract class DeviceTileServiceBase(private val slot: Int) : TileService() {
 
     override fun onClick() {
         super.onClick()
-        val device = CredentialStore(this).recentDevices(slot + 1).getOrNull(slot)
+        val device = resolveDevice()
 
         val intent = Intent(this, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
@@ -45,9 +47,15 @@ abstract class DeviceTileServiceBase(private val slot: Int) : TileService() {
         }
     }
 
+    private fun resolveDevice(): AppleTvDevice? {
+        val store = CredentialStore(this)
+        val bound = TileBindings.credentialKey(this, slot)?.let { store.loadDevice(it) }
+        return bound ?: store.recentDevices(slot + 1).getOrNull(slot)
+    }
+
     private fun refresh() {
         val tile = qsTile ?: return
-        val device = CredentialStore(this).recentDevices(slot + 1).getOrNull(slot)
+        val device = resolveDevice()
         tile.label = device?.name ?: getString(R.string.tile_unconfigured_label)
         tile.icon = Icon.createWithResource(this, R.drawable.ic_widget_remote)
         tile.state = if (device != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE

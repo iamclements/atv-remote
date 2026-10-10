@@ -16,13 +16,45 @@
     <string name="shortcut_long_label">Open %1$s</string>
 
     <!-- Home-screen widget -->
-    <string name="widget_unconfigured">Puck</string>
+    <string name="widget_unconfigured">Add a TV</string>
     <string name="widget_pick_device_title">Choose a TV for this widget</string>
     <string name="widget_pick_device_empty">Pair with an Apple TV in the app first, then add this widget.</string>
 
     <!-- Quick Settings tiles -->
-    <string name="tile_unconfigured_label">Puck</string>
+    <string name="tile_unconfigured_label">Add a TV</string>
     <string name="tile_subtitle">Tap to open</string>
+    <string name="tile_pick_device_title">Choose a TV for this tile</string>
+    <string name="tile_pick_device_empty">Pair with an Apple TV in the app first, then add this tile.</string>
+    <string name="cd_tile_configure">Choose a TV for this tile</string>
+
+    <!-- Settings -->
+    <string name="cd_settings">Settings</string>
+    <string name="cd_back">Back</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_control">Control</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_haptics_desc">Buzz on each D-pad press and button tap</string>
+    <string name="settings_button_sound">Button sound</string>
+    <string name="settings_button_sound_desc">Play a click sound on each button tap</string>
+    <string name="settings_sensitivity">Touchpad sensitivity</string>
+    <string name="settings_sensitivity_low">Low</string>
+    <string name="settings_sensitivity_medium">Medium</string>
+    <string name="settings_sensitivity_high">High</string>
+    <string name="settings_section_devices">Devices</string>
+    <string name="settings_manage_devices">Manage paired devices</string>
+    <string name="settings_manage_devices_desc">Rename or forget a paired Apple TV</string>
+
+    <!-- Manage devices -->
+    <string name="manage_devices_title">Manage devices</string>
+    <string name="manage_devices_empty">No paired Apple TVs yet.</string>
+    <string name="rename_device_title">Rename %1$s</string>
+    <string name="rename">Rename</string>
+    <string name="device_name_hint">Name</string>
+    <string name="forget_device_title">Forget %1$s?</string>
+    <string name="forget_device_message">You\'ll need to pair again to control it.</string>
+    <string name="forget">Forget</string>
+    <string name="cd_rename">Rename</string>
+    <string name="cd_forget">Forget</string>
     <string name="device_paired">Paired</string>
     <string name="device_pair">Pair</string>
     <string name="scan_again">Scan again</string>
