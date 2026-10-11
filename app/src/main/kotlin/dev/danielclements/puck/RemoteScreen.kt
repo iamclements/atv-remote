@@ -2,11 +2,13 @@ package dev.danielclements.puck
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -16,6 +18,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -73,6 +77,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -281,7 +287,7 @@ fun RemoteScreen(device: AppleTvDevice, state: UiState, vm: RemoteViewModel) {
                     soundEnabled = state.settings.buttonSoundEnabled,
                     sensitivity = state.settings.sensitivity.multiplier,
                     onDirectionDown = {
-                        feedback(HapticFeedbackType.TextHandleMove)
+                        feedback(HapticFeedbackType.LongPress)
                         vm.padDirectionDown(it)
                     },
                     onDirectionUp = { vm.padDirectionUp(it) },
@@ -334,7 +340,7 @@ private fun TransportRow(state: UiState, vm: RemoteViewModel) {
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         RoundButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.menu)) {
-            feedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.LongPress)
             vm.press(Button.MENU)
         }
 
@@ -346,12 +352,12 @@ private fun TransportRow(state: UiState, vm: RemoteViewModel) {
             icon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             description = stringResource(if (isPlaying) R.string.pause else R.string.play),
         ) {
-            feedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.LongPress)
             vm.press(Button.PLAY_PAUSE)
         }
 
         RoundButton(Icons.Default.Home, stringResource(R.string.home)) {
-            feedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.LongPress)
             vm.press(Button.HOME)
         }
     }
@@ -367,11 +373,11 @@ private fun VolumeRow(state: UiState, vm: RemoteViewModel) {
         // A touch taller than the icon alone so the row balances against the
         // 76 dp transport buttons above it instead of looking squeezed.
         PillButton(Icons.Default.VolumeDown, stringResource(R.string.volume_down), Modifier.weight(1f).height(60.dp)) {
-            feedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.LongPress)
             vm.volumeDown()
         }
         PillButton(Icons.Default.VolumeUp, stringResource(R.string.volume_up), Modifier.weight(1f).height(60.dp)) {
-            feedback(HapticFeedbackType.TextHandleMove)
+            feedback(HapticFeedbackType.LongPress)
             vm.volumeUp()
         }
     }
@@ -425,19 +431,27 @@ private fun TouchPad(
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .pointerInput(Unit) {
                     val centre = 500f
-                    // Frac is measured against a fixed 300 dp reference pad —
-                    // the size the sensitivity curve was tuned on — not against
-                    // this surface. The surface changes shape with the layout,
-                    // and a small one would amplify finger tremor into focus
-                    // jumps.
-                    val refPx = 300.dp.toPx()
+                    // Frac is measured against a fixed reference pad — the size
+                    // the sensitivity curve was tuned on — not against this
+                    // surface. The surface changes shape with the layout, and a
+                    // small one would amplify finger tremor into focus jumps.
+                    //
+                    // 160 dp, not the phone's full touch surface: a real Siri
+                    // Remote's clickpad is only ~35 mm, and even with the gain
+                    // curve's amplification a reference closer to this surface's
+                    // actual size (300dp) left an ordinary swipe barely crossing
+                    // it once — reading on the TV as "moved one item," not a
+                    // swipe. A smaller reference means the same finger travel
+                    // crosses it more times, which is both more frac (more raw
+                    // movement) and higher frac/sec (more acceleration gain).
+                    val refPx = 160.dp.toPx()
                     // A touch more generous than the visual circle (0.30):
                     // taps near its edge are still selects, and the rim
                     // chevrons sit far enough out to stay directional.
                     val centreRadius = minOf(size.width, size.height) * 0.38f
 
                     fun direction(pos: Offset) {
-                        feedback(HapticFeedbackType.TextHandleMove)
+                        feedback(HapticFeedbackType.LongPress)
                         val dx = pos.x - size.width / 2f
                         val dy = pos.y - size.height / 2f
                         val button = if (abs(dx) > abs(dy)) {
@@ -638,37 +652,51 @@ private fun TouchPad(
 private fun Modifier.repeatOnHold(
     firstDelayMs: Long = 400,
     stepDelayMs: Long = 150,
+    onPressedChange: (Boolean) -> Unit = {},
     onStep: () -> Unit,
 ): Modifier = pointerInput(Unit) {
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
         down.consume()
+        onPressedChange(true)
         onStep()
         var steps = 1
-        while (true) {
-            val event = awaitPointerEvent()
-            val change = event.changes.firstOrNull() ?: break
-            val heldFor = (change.uptimeMillis - down.uptimeMillis - firstDelayMs)
-                .coerceAtLeast(0L)
-            val target = 1 + (heldFor / stepDelayMs).toInt()
-            while (steps < target) {
-                onStep()
-                steps++
+        try {
+            while (true) {
+                val event = awaitPointerEvent()
+                val change = event.changes.firstOrNull() ?: break
+                val heldFor = (change.uptimeMillis - down.uptimeMillis - firstDelayMs)
+                    .coerceAtLeast(0L)
+                val target = 1 + (heldFor / stepDelayMs).toInt()
+                while (steps < target) {
+                    onStep()
+                    steps++
+                }
+                if (!change.pressed) break
+                change.consume()
             }
-            if (!change.pressed) break
-            change.consume()
+        } finally {
+            onPressedChange(false)
         }
     }
 }
 
-// Both axes 1:1 against the 300 dp reference pad, so the same finger travel
-// moves the focus the same distance whichever way you swipe.
+// Both axes 1:1 against the reference pad, so the same finger travel moves
+// the focus the same distance whichever way you swipe.
 private const val HORIZONTAL_SENSITIVITY = 1.0f
 private const val VERTICAL_SENSITIVITY = 1.0f
 
 /**
  * A haptic buzz, plus an optional system click sound, for a discrete button
  * press — gated by the user's Settings toggles rather than always firing.
+ *
+ * Every call site asks for [HapticFeedbackType.LongPress], not the seemingly
+ * more fitting [HapticFeedbackType.TextHandleMove] — it maps to
+ * `HapticFeedbackConstants.TEXT_HANDLE_MOVE`, which several OEMs (Samsung's
+ * One UI among them) silently no-op, since it's meant for a text cursor
+ * being dragged, not a generic button tap. `LONG_PRESS` is the one that
+ * reliably fires everywhere, Compose's haptic API just doesn't expose
+ * anything named for the occasion.
  */
 @Composable
 private fun rememberFeedback(hapticsEnabled: Boolean, soundEnabled: Boolean): (HapticFeedbackType) -> Unit {
@@ -698,12 +726,24 @@ private const val CENTRE_COMMIT_DP = 60
 
 @Composable
 private fun RoundButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    // A flat filled circle gives no feedback that it's a button rather than
+    // a badge — the shadow says "raised, tappable" at rest, and the dip on
+    // press is the same physical cue a real key gives.
+    val scale by animateFloatAsState(if (pressed) 0.92f else 1f, label = "roundButtonScale")
     Box(
         modifier = Modifier
             .size(76.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .shadow(elevation = if (pressed) 1.dp else 5.dp, shape = CircleShape, clip = false)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -1042,11 +1082,15 @@ private fun PillButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (pressed) 0.95f else 1f, label = "pillButtonScale")
     Row(
         modifier = modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .shadow(elevation = if (pressed) 1.dp else 4.dp, shape = RoundedCornerShape(10.dp), clip = false)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .repeatOnHold(onStep = onClick)
+            .repeatOnHold(onPressedChange = { pressed = it }, onStep = onClick)
             .semantics {
                 role = Role.Button
                 onClick { onClick(); true }
