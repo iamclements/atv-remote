@@ -4,6 +4,12 @@
   (same charcoal/white as the launcher icon) rather than a themed card —
   on most launchers a 1x1 widget sits in the grid indistinguishably from
   any other icon, and a custom card shape stood out as obviously not one.
+
+  The icon fills whatever space the launcher actually hands the widget
+  (weight="1", not a fixed dp size) — a fixed size assumes a cell close to
+  a launcher's own icon size, but a OneUI grid cell runs considerably
+  bigger than that, and a fixed-size icon just sat in the middle of the
+  extra space looking tiny next to every real icon around it.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,12 +17,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:padding="4dp">
 
     <ImageView
         android:id="@+id/widget_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="@drawable/widget_icon_background"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_launcher_foreground"
